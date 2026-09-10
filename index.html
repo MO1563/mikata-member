@@ -144,6 +144,14 @@
         background: #fff;
     }
 
+    /* 数値入力は右詰め */
+    .current-power-input,
+    .max-power-input,
+    .rally-input,
+    .support-input {
+        text-align: right;
+    }
+
     input[type="text"]:focus,
     input[type="number"]:focus {
         outline: 2px solid #90caf9;
@@ -536,6 +544,21 @@ function getArea(number) {
    テーブル作成
    ========================================================= */
 
+function formatNumberString(value) {
+    const raw = String(value ?? "").replace(/[^\d]/g, "");
+    return raw === "" ? "" : Number(raw).toLocaleString("ja-JP");
+}
+
+function setupNumberInput(input) {
+    input.type = "text";
+    input.inputMode = "numeric";
+
+    input.addEventListener("input", function() {
+        const raw = input.value.replace(/[^\d]/g, "");
+        input.value = raw === "" ? "" : Number(raw).toLocaleString("ja-JP");
+    });
+}
+
 function createTable() {
 
     const tbody = document.getElementById("tableBody");
@@ -589,8 +612,7 @@ function createTable() {
 
         const currentPowerInput = document.createElement("input");
 
-        currentPowerInput.type = "text";
-        currentPowerInput.inputMode = "numeric";
+        setupNumberInput(currentPowerInput);
         currentPowerInput.className = "current-power-input";
 
         currentPowerTd.appendChild(currentPowerInput);
@@ -605,8 +627,7 @@ function createTable() {
 
         const maxPowerInput = document.createElement("input");
 
-        maxPowerInput.type = "text";
-        maxPowerInput.inputMode = "numeric";
+        setupNumberInput(maxPowerInput);
         maxPowerInput.className = "max-power-input";
 
         maxPowerTd.appendChild(maxPowerInput);
@@ -621,8 +642,7 @@ function createTable() {
 
         const rallyInput = document.createElement("input");
 
-        rallyInput.type = "text";
-        rallyInput.inputMode = "numeric";
+        setupNumberInput(rallyInput);
         rallyInput.className = "rally-input";
 
         rallyTd.appendChild(rallyInput);
@@ -637,8 +657,7 @@ function createTable() {
 
         const supportInput = document.createElement("input");
 
-        supportInput.type = "text";
-        supportInput.inputMode = "numeric";
+        setupNumberInput(supportInput);
         supportInput.className = "support-input";
 
         supportTd.appendChild(supportInput);
@@ -797,22 +816,22 @@ function setPlayerData(tr, data) {
 
     if (currentPowerInput) {
         currentPowerInput.value =
-            data.currentPower ?? "";
+            formatNumberString(data.currentPower);
     }
 
     if (maxPowerInput) {
         maxPowerInput.value =
-            data.maxPower ?? "";
+            formatNumberString(data.maxPower);
     }
 
     if (rallyInput) {
         rallyInput.value =
-            data.rally ?? "";
+            formatNumberString(data.rally);
     }
 
     if (supportInput) {
         supportInput.value =
-            data.support ?? "";
+            formatNumberString(data.support);
     }
 
     if (attendanceSelect) {
@@ -1402,7 +1421,7 @@ document
 
 
                 if (
-                    text.includes(" ") ||
+                    text.includes("�") ||
                     !text.includes("番号")
                 ) {
 
@@ -1750,6 +1769,10 @@ document
 /* =========================================================
    CSVエスケープ
    ========================================================= */
+
+function unformatNumber(value) {
+    return String(value ?? "").replace(/,/g, "");
+}
 
 function csvEscape(value) {
 
