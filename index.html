@@ -1,0 +1,1939 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>三方ヶ原の戦い 管理表</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        padding: 20px;
+        font-family:
+            "Yu Gothic",
+            "Meiryo",
+            Arial,
+            sans-serif;
+        background: #f4f5f7;
+        color: #222;
+    }
+
+    h1 {
+        margin: 0 0 15px;
+        font-size: 24px;
+    }
+
+    .description {
+        margin-bottom: 15px;
+        padding: 12px 15px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .description strong {
+        color: #c62828;
+    }
+
+    .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 15px;
+        align-items: center;
+    }
+
+    button,
+    input[type="text"],
+    select {
+        font-size: 14px;
+        padding: 8px 10px;
+        border: 1px solid #bbb;
+        border-radius: 5px;
+        background: #fff;
+    }
+
+    button {
+        cursor: pointer;
+        background: #333;
+        color: #fff;
+        border-color: #333;
+    }
+
+    button:hover {
+        opacity: 0.85;
+    }
+
+    .file-label {
+        display: inline-block;
+        padding: 8px 12px;
+        border-radius: 5px;
+        background: #1976d2;
+        color: #fff;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .file-label:hover {
+        opacity: 0.85;
+    }
+
+    #csvFile {
+        display: none;
+    }
+
+    .status {
+        margin-left: auto;
+        font-size: 13px;
+        color: #555;
+    }
+
+    .table-wrapper {
+        width: 100%;
+        overflow: auto;
+        max-height: calc(100vh - 230px);
+        background: #fff;
+        border: 1px solid #ccc;
+    }
+
+    table {
+        border-collapse: separate;
+        border-spacing: 0;
+        min-width: 1250px;
+        width: 100%;
+    }
+
+    th,
+    td {
+        height: 42px;
+        padding: 5px 8px;
+        border-right: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+        white-space: nowrap;
+        background: #fff;
+    }
+
+    th {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: #333;
+        color: #fff;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    td {
+        text-align: center;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+        width: 100%;
+        min-width: 0;
+        height: 30px;
+        padding: 4px 6px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        background: #fff;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus {
+        outline: 2px solid #90caf9;
+        border-color: #1976d2;
+    }
+
+    /* 列幅 */
+    .col-number {
+        width: 55px;
+        min-width: 55px;
+    }
+
+    .col-name {
+        width: 160px;
+        min-width: 160px;
+    }
+
+    .col-power {
+        width: 135px;
+        min-width: 135px;
+    }
+
+    .col-rally {
+        width: 120px;
+        min-width: 120px;
+    }
+
+    .col-point {
+        width: 85px;
+        min-width: 85px;
+    }
+
+    .col-area {
+        width: 90px;
+        min-width: 90px;
+    }
+
+    .col-attendance {
+        width: 90px;
+        min-width: 90px;
+    }
+
+    /* =========================
+       固定列
+       番号 → 自陣点数 → エリア
+       ========================= */
+
+    .sticky-number {
+        position: sticky;
+        left: 0;
+        z-index: 30;
+    }
+
+    .sticky-point {
+        position: sticky;
+        left: 55px;
+        z-index: 29;
+    }
+
+    .sticky-area {
+        position: sticky;
+        left: 140px;
+        z-index: 28;
+    }
+
+    th.sticky-number,
+    th.sticky-point,
+    th.sticky-area {
+        z-index: 40;
+    }
+
+    /* 固定列の背景 */
+    td.sticky-number {
+        background: #fff;
+        font-weight: bold;
+    }
+
+    td.sticky-point {
+        background: #fff;
+        font-weight: bold;
+    }
+
+    td.sticky-area {
+        font-weight: bold;
+    }
+
+    /* エリア */
+    .area-middle {
+        background: #d9efff !important;
+        color: #1565c0;
+    }
+
+    .area-honjin {
+        background: #eeeeee !important;
+        color: #555;
+    }
+
+    .area-empty {
+        background: #fff !important;
+    }
+
+    /* 51番以降を少し暗くする */
+    tr.after-50 td {
+        background-color: #f1f1f1;
+    }
+
+    tr.after-50 td.sticky-number {
+        background-color: #f1f1f1;
+    }
+
+    tr.after-50 td.sticky-point {
+        background-color: #f1f1f1;
+    }
+
+    tr.after-50 td.area-empty {
+        background-color: #f1f1f1 !important;
+    }
+
+    /* エリア色を優先 */
+    tr.after-50 td.area-middle {
+        background-color: #d9efff !important;
+    }
+
+    tr.after-50 td.area-honjin {
+        background-color: #eeeeee !important;
+    }
+
+    /* 20番の下に赤い太線 */
+    tr.row-20 td {
+        border-bottom: 4px solid #d32f2f !important;
+    }
+
+    /* ソート可能 */
+    th.sortable {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    th.sortable:hover {
+        background: #555;
+    }
+
+    .sort-mark {
+        margin-left: 5px;
+        font-size: 11px;
+        color: #ddd;
+    }
+
+    /* 出欠 */
+    .attendance-select {
+        width: 80px;
+        height: 30px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        background: #fff;
+        text-align: center;
+    }
+
+    .attendance-participate {
+        background: #e8f5e9 !important;
+        color: #2e7d32;
+        font-weight: bold;
+    }
+
+    .attendance-absent {
+        background: #ffebee !important;
+        color: #c62828;
+        font-weight: bold;
+    }
+
+    .attendance-undecided {
+        background: #fff8e1 !important;
+        color: #f57f17;
+        font-weight: bold;
+    }
+
+    /* 非表示 */
+    tr.hidden-row {
+        display: none;
+    }
+
+    .count {
+        font-weight: bold;
+    }
+
+    @media (max-width: 700px) {
+        body {
+            padding: 10px;
+        }
+
+        h1 {
+            font-size: 20px;
+        }
+
+        .status {
+            width: 100%;
+            margin-left: 0;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<h1>三方ヶ原の戦い 管理表</h1>
+
+<div class="description">
+    <strong>並び替えについて：</strong>
+    ハンドルネーム・現戦力・過去最高戦力・集結上限・援軍上限・出欠を並び替えても、
+    <strong>番号・自陣点数・エリアは固定されたまま動きません。</strong><br>
+    プレイヤー情報だけが100個の固定枠の中で入れ替わります。
+</div>
+
+<div class="controls">
+
+    <label class="file-label" for="csvFile">
+        CSV読み込み
+    </label>
+    <input
+        type="file"
+        id="csvFile"
+        accept=".csv,text/csv"
+    >
+
+    <button id="exportCsv">
+        CSV書き出し
+    </button>
+
+    <button id="resetTable">
+        初期状態に戻す
+    </button>
+
+    <input
+        type="text"
+        id="searchName"
+        placeholder="ハンドルネーム検索"
+    >
+
+    <select id="filterAttendance">
+        <option value="">出欠：すべて</option>
+        <option value="参加">参加</option>
+        <option value="欠席">欠席</option>
+        <option value="未定">未定</option>
+    </select>
+
+    <select id="filterArea">
+        <option value="">エリア：すべて</option>
+        <option value="中">中</option>
+        <option value="旗本">旗本</option>
+        <option value="空欄">空欄</option>
+    </select>
+
+    <span class="status">
+        表示：<span id="displayCount" class="count">100</span> / 100人
+    </span>
+
+</div>
+
+<div class="table-wrapper">
+
+<table id="mainTable">
+
+    <thead>
+        <tr>
+            <th class="col-number sticky-number">
+                番号
+            </th>
+
+            <th
+                class="col-name sortable"
+                data-column="name"
+            >
+                ハンドルネーム
+                <span class="sort-mark"></span>
+            </th>
+
+            <th
+                class="col-power sortable"
+                data-column="currentPower"
+            >
+                現戦力
+                <span class="sort-mark"></span>
+            </th>
+
+            <th
+                class="col-power sortable"
+                data-column="maxPower"
+            >
+                過去最高戦力
+                <span class="sort-mark"></span>
+            </th>
+
+            <th
+                class="col-rally sortable"
+                data-column="rally"
+            >
+                集結上限
+                <span class="sort-mark"></span>
+            </th>
+
+            <th
+                class="col-rally sortable"
+                data-column="support"
+            >
+                援軍上限
+                <span class="sort-mark"></span>
+            </th>
+
+            <th class="col-point sticky-point">
+                自陣点数
+            </th>
+
+            <th class="col-area sticky-area">
+                エリア
+            </th>
+
+            <th
+                class="col-attendance sortable"
+                data-column="attendance"
+            >
+                出欠
+                <span class="sort-mark"></span>
+            </th>
+        </tr>
+    </thead>
+
+    <tbody id="tableBody"></tbody>
+
+</table>
+
+</div>
+
+<script>
+
+"use strict";
+
+/* =========================================================
+   基本設定
+   ========================================================= */
+
+const TOTAL_ROWS = 100;
+
+let sortColumn = null;
+let sortDirection = 1;
+
+
+/* =========================================================
+   固定データ
+   ========================================================= */
+
+/*
+    番号によって自陣点数を決定
+*/
+function getPoint(number) {
+
+    if (number >= 1 && number <= 10) {
+        return 500;
+    }
+
+    if (number >= 11 && number <= 20) {
+        return 200;
+    }
+
+    if (number >= 21 && number <= 50) {
+        return 100;
+    }
+
+    return "";
+}
+
+
+/*
+    番号によってエリアを決定
+*/
+function getArea(number) {
+
+    if (number >= 1 && number <= 20) {
+        return "中";
+    }
+
+    if (number >= 21 && number <= 50) {
+        return "旗本";
+    }
+
+    return "";
+}
+
+
+/* =========================================================
+   テーブル作成
+   ========================================================= */
+
+function createTable() {
+
+    const tbody = document.getElementById("tableBody");
+
+    tbody.innerHTML = "";
+
+    for (let number = 1; number <= TOTAL_ROWS; number++) {
+
+        const tr = document.createElement("tr");
+
+        tr.dataset.number = number;
+
+        if (number === 20) {
+            tr.classList.add("row-20");
+        }
+
+        if (number >= 51) {
+            tr.classList.add("after-50");
+        }
+
+        /* 番号 */
+        const numberTd = document.createElement("td");
+
+        numberTd.className =
+            "col-number sticky-number";
+
+        numberTd.textContent = number;
+
+        tr.appendChild(numberTd);
+
+
+        /* ハンドルネーム */
+        const nameTd = document.createElement("td");
+
+        nameTd.className = "col-name";
+
+        const nameInput = document.createElement("input");
+
+        nameInput.type = "text";
+        nameInput.className = "name-input";
+
+        nameTd.appendChild(nameInput);
+
+        tr.appendChild(nameTd);
+
+
+        /* 現戦力 */
+        const currentPowerTd = document.createElement("td");
+
+        currentPowerTd.className = "col-power";
+
+        const currentPowerInput = document.createElement("input");
+
+        currentPowerInput.type = "text";
+        currentPowerInput.inputMode = "numeric";
+        currentPowerInput.className = "current-power-input";
+
+        currentPowerTd.appendChild(currentPowerInput);
+
+        tr.appendChild(currentPowerTd);
+
+
+        /* 過去最高戦力 */
+        const maxPowerTd = document.createElement("td");
+
+        maxPowerTd.className = "col-power";
+
+        const maxPowerInput = document.createElement("input");
+
+        maxPowerInput.type = "text";
+        maxPowerInput.inputMode = "numeric";
+        maxPowerInput.className = "max-power-input";
+
+        maxPowerTd.appendChild(maxPowerInput);
+
+        tr.appendChild(maxPowerTd);
+
+
+        /* 集結上限 */
+        const rallyTd = document.createElement("td");
+
+        rallyTd.className = "col-rally";
+
+        const rallyInput = document.createElement("input");
+
+        rallyInput.type = "text";
+        rallyInput.inputMode = "numeric";
+        rallyInput.className = "rally-input";
+
+        rallyTd.appendChild(rallyInput);
+
+        tr.appendChild(rallyTd);
+
+
+        /* 援軍上限 */
+        const supportTd = document.createElement("td");
+
+        supportTd.className = "col-rally";
+
+        const supportInput = document.createElement("input");
+
+        supportInput.type = "text";
+        supportInput.inputMode = "numeric";
+        supportInput.className = "support-input";
+
+        supportTd.appendChild(supportInput);
+
+        tr.appendChild(supportTd);
+
+
+        /* 自陣点数 */
+        const pointTd = document.createElement("td");
+
+        pointTd.className =
+            "col-point sticky-point";
+
+        pointTd.textContent = getPoint(number);
+
+        tr.appendChild(pointTd);
+
+
+        /* エリア */
+        const areaTd = document.createElement("td");
+
+        const area = getArea(number);
+
+        areaTd.className =
+            "col-area sticky-area";
+
+        if (area === "中") {
+            areaTd.classList.add("area-middle");
+        }
+        else if (area === "旗本") {
+            areaTd.classList.add("area-honjin");
+        }
+        else {
+            areaTd.classList.add("area-empty");
+        }
+
+        areaTd.textContent = area;
+
+        tr.appendChild(areaTd);
+
+
+        /* 出欠 */
+        const attendanceTd = document.createElement("td");
+
+        attendanceTd.className = "col-attendance";
+
+        const attendanceSelect =
+            document.createElement("select");
+
+        attendanceSelect.className =
+            "attendance-select";
+
+        const options = [
+            "",
+            "参加",
+            "欠席",
+            "未定"
+        ];
+
+        options.forEach(value => {
+
+            const option =
+                document.createElement("option");
+
+            option.value = value;
+            option.textContent =
+                value === "" ? "未設定" : value;
+
+            attendanceSelect.appendChild(option);
+        });
+
+        attendanceTd.appendChild(attendanceSelect);
+
+        tr.appendChild(attendanceTd);
+
+
+        tbody.appendChild(tr);
+    }
+
+    updateAttendanceColors();
+}
+
+
+/* =========================================================
+   プレイヤーデータ取得
+   ========================================================= */
+
+/*
+    重要：
+
+    ここで取得するのは「プレイヤー情報だけ」。
+
+    番号
+    自陣点数
+    エリア
+
+    は取得しない。
+
+    これによって並び替え時にも
+    固定情報が動かない。
+*/
+
+function getPlayerData(tr) {
+
+    return {
+
+        name:
+            tr.querySelector(".name-input")?.value || "",
+
+        currentPower:
+            tr.querySelector(".current-power-input")?.value || "",
+
+        maxPower:
+            tr.querySelector(".max-power-input")?.value || "",
+
+        rally:
+            tr.querySelector(".rally-input")?.value || "",
+
+        support:
+            tr.querySelector(".support-input")?.value || "",
+
+        attendance:
+            tr.querySelector(".attendance-select")?.value || ""
+    };
+}
+
+
+/* =========================================================
+   プレイヤーデータを書き込み
+   ========================================================= */
+
+function setPlayerData(tr, data) {
+
+    const nameInput =
+        tr.querySelector(".name-input");
+
+    const currentPowerInput =
+        tr.querySelector(".current-power-input");
+
+    const maxPowerInput =
+        tr.querySelector(".max-power-input");
+
+    const rallyInput =
+        tr.querySelector(".rally-input");
+
+    const supportInput =
+        tr.querySelector(".support-input");
+
+    const attendanceSelect =
+        tr.querySelector(".attendance-select");
+
+
+    if (nameInput) {
+        nameInput.value = data.name ?? "";
+    }
+
+    if (currentPowerInput) {
+        currentPowerInput.value =
+            data.currentPower ?? "";
+    }
+
+    if (maxPowerInput) {
+        maxPowerInput.value =
+            data.maxPower ?? "";
+    }
+
+    if (rallyInput) {
+        rallyInput.value =
+            data.rally ?? "";
+    }
+
+    if (supportInput) {
+        supportInput.value =
+            data.support ?? "";
+    }
+
+    if (attendanceSelect) {
+        attendanceSelect.value =
+            data.attendance ?? "";
+    }
+}
+
+
+/* =========================================================
+   ソート比較
+   ========================================================= */
+
+function compareValues(a, b, column) {
+
+    const aValue = a[column];
+    const bValue = b[column];
+
+    const aBlank =
+        aValue === null ||
+        aValue === undefined ||
+        String(aValue).trim() === "";
+
+    const bBlank =
+        bValue === null ||
+        bValue === undefined ||
+        String(bValue).trim() === "";
+
+
+    /*
+        空欄同士
+    */
+    if (aBlank && bBlank) {
+        return {
+            value: 0,
+            blank: true
+        };
+    }
+
+
+    /*
+        aだけ空欄
+        → aを必ず後ろへ
+    */
+    if (aBlank) {
+        return {
+            value: 1,
+            blank: true
+        };
+    }
+
+
+    /*
+        bだけ空欄
+        → bを必ず後ろへ
+    */
+    if (bBlank) {
+        return {
+            value: -1,
+            blank: true
+        };
+    }
+
+
+    /*
+        数値項目
+    */
+
+    const numericColumns = [
+        "currentPower",
+        "maxPower",
+        "rally",
+        "support"
+    ];
+
+    if (numericColumns.includes(column)) {
+
+        const aNum = Number(
+            String(aValue).replace(/,/g, "")
+        );
+
+        const bNum = Number(
+            String(bValue).replace(/,/g, "")
+        );
+
+        if (
+            !Number.isNaN(aNum) &&
+            !Number.isNaN(bNum)
+        ) {
+
+            return {
+                value: aNum - bNum,
+                blank: false
+            };
+        }
+    }
+
+
+    /*
+        文字列項目
+    */
+
+    return {
+        value: String(aValue).localeCompare(
+            String(bValue),
+            "ja"
+        ),
+        blank: false
+    };
+}
+/* =========================================================
+   プレイヤー情報だけを並び替える
+   ========================================================= */
+
+/*
+    ★今回の重要部分★
+
+    <tr>そのものは絶対に移動しない。
+
+    100個の固定行をそのまま残し、
+
+    プレイヤー情報だけを
+
+    1番枠
+    2番枠
+    3番枠
+    ...
+    100番枠
+
+    に書き戻す。
+*/
+
+function sortRows(column) {
+
+    const tbody =
+        document.getElementById("tableBody");
+
+    const rows =
+        Array.from(
+            tbody.querySelectorAll("tr")
+        );
+
+
+    /*
+        各固定行から
+        プレイヤー情報だけ取得
+    */
+
+    const records = rows.map(
+        (tr, index) => {
+
+            return {
+                data: getPlayerData(tr),
+                originalIndex: index
+            };
+        }
+    );
+
+
+    /*
+        プレイヤー情報を並び替え
+    */
+
+    records.sort((a, b) => {
+
+        const result =
+            compareValues(
+                a.data,
+                b.data,
+                column
+            );
+
+
+        /*
+            ★重要★
+
+            空欄の判定は
+            sortDirectionの影響を受けない。
+
+            したがって、
+
+            昇順：
+            データ
+            データ
+            データ
+            空欄
+            空欄
+
+            降順：
+            データ
+            データ
+            データ
+            空欄
+            空欄
+
+            となる。
+        */
+
+        if (result.blank) {
+            return result.value;
+        }
+
+
+        /*
+            空欄ではない場合だけ
+            昇順・降順を適用
+        */
+
+        if (result.value === 0) {
+
+            return (
+                a.originalIndex -
+                b.originalIndex
+            );
+        }
+
+        return result.value * sortDirection;
+    });
+
+
+    /*
+        ★固定行へプレイヤー情報だけを書き戻す★
+
+        tr自体は移動させない。
+
+        番号
+        自陣点数
+        エリア
+
+        はそのまま固定。
+    */
+
+    rows.forEach((tr, index) => {
+
+        setPlayerData(
+            tr,
+            records[index].data
+        );
+    });
+
+
+    updateSortMarks(column);
+    updateAttendanceColors();
+    updateDisplayCount();
+}
+
+/* =========================================================
+   ソートマーク
+   ========================================================= */
+
+function updateSortMarks(activeColumn) {
+
+    document
+        .querySelectorAll("th.sortable")
+        .forEach(th => {
+
+            const mark =
+                th.querySelector(".sort-mark");
+
+            const column =
+                th.dataset.column;
+
+            if (column === activeColumn) {
+
+                mark.textContent =
+                    sortDirection === 1
+                        ? "▲"
+                        : "▼";
+            }
+            else {
+
+                mark.textContent = "";
+            }
+        });
+}
+
+
+/* =========================================================
+   出欠の色
+   ========================================================= */
+
+function updateAttendanceColors() {
+
+    document
+        .querySelectorAll(".attendance-select")
+        .forEach(select => {
+
+            select.classList.remove(
+                "attendance-participate",
+                "attendance-absent",
+                "attendance-undecided"
+            );
+
+            if (select.value === "参加") {
+
+                select.classList.add(
+                    "attendance-participate"
+                );
+            }
+
+            else if (select.value === "欠席") {
+
+                select.classList.add(
+                    "attendance-absent"
+                );
+            }
+
+            else if (select.value === "未定") {
+
+                select.classList.add(
+                    "attendance-undecided"
+                );
+            }
+        });
+}
+
+
+/* =========================================================
+   フィルター
+   ========================================================= */
+
+function applyFilters() {
+
+    const nameKeyword =
+        document
+            .getElementById("searchName")
+            .value
+            .trim()
+            .toLowerCase();
+
+    const attendanceFilter =
+        document
+            .getElementById("filterAttendance")
+            .value;
+
+    const areaFilter =
+        document
+            .getElementById("filterArea")
+            .value;
+
+
+    const rows =
+        document
+            .querySelectorAll("#tableBody tr");
+
+    let visibleCount = 0;
+
+
+    rows.forEach(tr => {
+
+        const name =
+            tr.querySelector(
+                ".name-input"
+            )?.value
+            .trim()
+            .toLowerCase() || "";
+
+        const attendance =
+            tr.querySelector(
+                ".attendance-select"
+            )?.value || "";
+
+        const number =
+            Number(tr.dataset.number);
+
+        const area =
+            getArea(number);
+
+
+        let visible = true;
+
+
+        /* 名前 */
+        if (
+            nameKeyword &&
+            !name.includes(nameKeyword)
+        ) {
+            visible = false;
+        }
+
+
+        /* 出欠 */
+        if (
+            attendanceFilter &&
+            attendance !== attendanceFilter
+        ) {
+            visible = false;
+        }
+
+
+        /* エリア */
+        if (areaFilter) {
+
+            if (
+                areaFilter === "空欄" &&
+                area !== ""
+            ) {
+                visible = false;
+            }
+
+            if (
+                areaFilter !== "空欄" &&
+                area !== areaFilter
+            ) {
+                visible = false;
+            }
+        }
+
+
+        if (visible) {
+
+            tr.classList.remove(
+                "hidden-row"
+            );
+
+            visibleCount++;
+        }
+        else {
+
+            tr.classList.add(
+                "hidden-row"
+            );
+        }
+    });
+
+
+    document.getElementById(
+        "displayCount"
+    ).textContent = visibleCount;
+}
+
+
+/* =========================================================
+   表示人数更新
+   ========================================================= */
+
+function updateDisplayCount() {
+
+    const visibleRows =
+        document.querySelectorAll(
+            "#tableBody tr:not(.hidden-row)"
+        );
+
+    document.getElementById(
+        "displayCount"
+    ).textContent =
+        visibleRows.length;
+}
+
+
+/* =========================================================
+   CSV解析
+   ========================================================= */
+
+function parseCSV(text) {
+
+    const rows = [];
+
+    let row = [];
+    let value = "";
+    let insideQuotes = false;
+
+
+    for (let i = 0; i < text.length; i++) {
+
+        const char = text[i];
+        const next = text[i + 1];
+
+
+        if (char === '"') {
+
+            if (
+                insideQuotes &&
+                next === '"'
+            ) {
+
+                value += '"';
+                i++;
+            }
+            else {
+
+                insideQuotes =
+                    !insideQuotes;
+            }
+
+            continue;
+        }
+
+
+        if (
+            char === "," &&
+            !insideQuotes
+        ) {
+
+            row.push(value);
+            value = "";
+            continue;
+        }
+
+
+        if (
+            (char === "\n" ||
+             char === "\r") &&
+            !insideQuotes
+        ) {
+
+            if (
+                char === "\r" &&
+                next === "\n"
+            ) {
+                i++;
+            }
+
+            row.push(value);
+
+            rows.push(row);
+
+            row = [];
+            value = "";
+
+            continue;
+        }
+
+
+        value += char;
+    }
+
+
+    /*
+        最後の行
+    */
+
+    if (
+        value !== "" ||
+        row.length > 0
+    ) {
+
+        row.push(value);
+        rows.push(row);
+    }
+
+
+    return rows;
+}
+
+
+/* =========================================================
+   CSV読み込み
+   ========================================================= */
+
+document
+    .getElementById("csvFile")
+    .addEventListener(
+        "change",
+        function(event) {
+
+            const file =
+                event.target.files[0];
+
+            if (!file) {
+                return;
+            }
+
+
+            const reader =
+                new FileReader();
+
+
+            reader.onload = function(e) {
+
+                const bytes =
+                    new Uint8Array(
+                        e.target.result
+                    );
+
+
+                /*
+                    UTF-8を優先。
+                    日本語CSVが文字化けした場合は
+                    Shift-JISも試す。
+                */
+
+                let text =
+                    new TextDecoder(
+                        "utf-8"
+                    ).decode(bytes);
+
+
+                if (
+                    text.includes(" ") ||
+                    !text.includes("番号")
+                ) {
+
+                    try {
+
+                        text =
+                            new TextDecoder(
+                                "shift_jis"
+                            ).decode(bytes);
+
+                    }
+                    catch (error) {
+
+                        console.error(error);
+                    }
+                }
+
+
+                /*
+                    BOM除去
+                */
+
+                text =
+                    text.replace(
+                        /^\uFEFF/,
+                        ""
+                    );
+
+
+                const csvRows =
+                    parseCSV(text);
+
+
+                if (csvRows.length < 2) {
+
+                    alert(
+                        "CSVのデータが見つかりません。"
+                    );
+
+                    return;
+                }
+
+
+                /*
+                    ヘッダー
+                */
+
+                const headers =
+                    csvRows[0].map(
+                        h => h.trim()
+                    );
+
+
+                /*
+                    列番号を検索
+                */
+
+                const indexNumber =
+                    headers.indexOf("番号");
+
+                const indexName =
+                    headers.indexOf(
+                        "ハンドルネーム"
+                    );
+
+                let indexCurrentPower =
+                    headers.indexOf(
+                        "現戦力9/7"
+                    );
+
+                if (
+                    indexCurrentPower === -1
+                ) {
+
+                    indexCurrentPower =
+                        headers.indexOf(
+                            "現戦力"
+                        );
+                }
+
+
+                const indexMaxPower =
+                    headers.indexOf(
+                        "過去最高戦力"
+                    );
+
+                const indexRally =
+                    headers.indexOf(
+                        "集結上限"
+                    );
+
+                const indexSupport =
+                    headers.indexOf(
+                        "援軍上限"
+                    );
+
+                const indexAttendance =
+                    headers.indexOf(
+                        "出欠"
+                    );
+
+
+                /*
+                    一度100枠を初期化。
+
+                    番号順の固定枠に戻す。
+                */
+
+                createTable();
+
+
+                const rows =
+                    document.querySelectorAll(
+                        "#tableBody tr"
+                    );
+
+
+                /*
+                    CSVの番号を基準に
+                    固定された番号枠へ入れる
+                */
+
+                for (
+                    let i = 1;
+                    i < csvRows.length;
+                    i++
+                ) {
+
+                    const csvRow =
+                        csvRows[i];
+
+                    if (
+                        !csvRow ||
+                        csvRow.length === 0
+                    ) {
+                        continue;
+                    }
+
+
+                    const number =
+                        Number(
+                            csvRow[indexNumber]
+                        );
+
+
+                    if (
+                        !Number.isInteger(number) ||
+                        number < 1 ||
+                        number > TOTAL_ROWS
+                    ) {
+                        continue;
+                    }
+
+
+                    const tr =
+                        rows[number - 1];
+
+
+                    const data = {
+
+                        name:
+                            indexName >= 0
+                                ? csvRow[indexName] || ""
+                                : "",
+
+                        currentPower:
+                            indexCurrentPower >= 0
+                                ? csvRow[indexCurrentPower] || ""
+                                : "",
+
+                        maxPower:
+                            indexMaxPower >= 0
+                                ? csvRow[indexMaxPower] || ""
+                                : "",
+
+                        rally:
+                            indexRally >= 0
+                                ? csvRow[indexRally] || ""
+                                : "",
+
+                        support:
+                            indexSupport >= 0
+                                ? csvRow[indexSupport] || ""
+                                : "",
+
+                        attendance:
+                            indexAttendance >= 0
+                                ? csvRow[indexAttendance] || ""
+                                : ""
+                    };
+
+
+                    setPlayerData(
+                        tr,
+                        data
+                    );
+                }
+
+
+                sortColumn = null;
+                sortDirection = 1;
+
+                updateSortMarks(null);
+                updateAttendanceColors();
+                applyFilters();
+
+
+                alert(
+                    "CSVを読み込みました。"
+                );
+            };
+
+
+            reader.readAsArrayBuffer(file);
+
+            /*
+                同じファイルを再選択できるようにする
+            */
+
+            event.target.value = "";
+        }
+    );
+
+
+/* =========================================================
+   CSV書き出し
+   ========================================================= */
+
+document
+    .getElementById("exportCsv")
+    .addEventListener(
+        "click",
+        function() {
+
+            const rows =
+                document.querySelectorAll(
+                    "#tableBody tr"
+                );
+
+
+            const csv = [];
+
+
+            /*
+                ヘッダー
+            */
+
+            csv.push([
+                "番号",
+                "ハンドルネーム",
+                "現戦力",
+                "過去最高戦力",
+                "集結上限",
+                "援軍上限",
+                "自陣点数",
+                "エリア",
+                "出欠"
+            ].map(csvEscape).join(","));
+
+
+            /*
+                固定された1～100番の順番で出力
+            */
+
+            rows.forEach(tr => {
+
+                const number =
+                    Number(tr.dataset.number);
+
+                const data =
+                    getPlayerData(tr);
+
+
+                const row = [
+
+                    number,
+
+                    data.name,
+
+                    data.currentPower,
+
+                    data.maxPower,
+
+                    data.rally,
+
+                    data.support,
+
+                    getPoint(number),
+
+                    getArea(number),
+
+                    data.attendance
+                ];
+
+
+                csv.push(
+                    row
+                        .map(csvEscape)
+                        .join(",")
+                );
+            });
+
+
+            /*
+                BOM付きUTF-8
+                Excelで日本語を文字化けさせにくくする
+            */
+
+            const blob =
+                new Blob(
+                    [
+                        "\uFEFF" +
+                        csv.join("\r\n")
+                    ],
+                    {
+                        type:
+                            "text/csv;charset=utf-8;"
+                    }
+                );
+
+
+            const url =
+                URL.createObjectURL(blob);
+
+
+            const link =
+                document.createElement("a");
+
+            link.href = url;
+
+            link.download =
+                "三方ヶ原_管理表.csv";
+
+            document.body.appendChild(link);
+
+            link.click();
+
+            document.body.removeChild(link);
+
+            URL.revokeObjectURL(url);
+        }
+    );
+
+
+/* =========================================================
+   CSVエスケープ
+   ========================================================= */
+
+function csvEscape(value) {
+
+    const text =
+        value === null ||
+        value === undefined
+            ? ""
+            : String(value);
+
+
+    if (
+        text.includes(",") ||
+        text.includes('"') ||
+        text.includes("\n") ||
+        text.includes("\r")
+    ) {
+
+        return '"' +
+            text.replace(
+                /"/g,
+                '""'
+            ) +
+            '"';
+    }
+
+
+    return text;
+}
+
+
+/* =========================================================
+   ソートボタン
+   ========================================================= */
+
+document
+    .querySelectorAll("th.sortable")
+    .forEach(th => {
+
+        th.addEventListener(
+            "click",
+            function() {
+
+                const column =
+                    this.dataset.column;
+
+
+                /*
+                    同じ列をクリック
+                    → 昇順/降順を反転
+
+                    別の列をクリック
+                    → 昇順から開始
+                */
+
+                if (
+                    sortColumn === column
+                ) {
+
+                    sortDirection *= -1;
+                }
+                else {
+
+                    sortColumn = column;
+
+                    sortDirection = 1;
+                }
+
+
+                sortRows(column);
+            }
+        );
+    });
+
+
+/* =========================================================
+   フィルターイベント
+   ========================================================= */
+
+document
+    .getElementById("searchName")
+    .addEventListener(
+        "input",
+        applyFilters
+    );
+
+
+document
+    .getElementById("filterAttendance")
+    .addEventListener(
+        "change",
+        applyFilters
+    );
+
+
+document
+    .getElementById("filterArea")
+    .addEventListener(
+        "change",
+        applyFilters
+    );
+
+
+/* =========================================================
+   出欠変更時
+   ========================================================= */
+
+document
+    .getElementById("tableBody")
+    .addEventListener(
+        "change",
+        function(event) {
+
+            if (
+                event.target.classList.contains(
+                    "attendance-select"
+                )
+            ) {
+
+                updateAttendanceColors();
+                applyFilters();
+            }
+        }
+    );
+
+
+/* =========================================================
+   初期状態に戻す
+   ========================================================= */
+
+document
+    .getElementById("resetTable")
+    .addEventListener(
+        "click",
+        function() {
+
+            const confirmed =
+                confirm(
+                    "入力したデータをすべて消して、100枠を初期状態に戻しますか？"
+                );
+
+
+            if (!confirmed) {
+                return;
+            }
+
+
+            createTable();
+
+
+            sortColumn = null;
+            sortDirection = 1;
+
+            updateSortMarks(null);
+
+
+            document.getElementById(
+                "searchName"
+            ).value = "";
+
+
+            document.getElementById(
+                "filterAttendance"
+            ).value = "";
+
+
+            document.getElementById(
+                "filterArea"
+            ).value = "";
+
+
+            updateDisplayCount();
+        }
+    );
+
+
+/* =========================================================
+   初期表示
+   ========================================================= */
+
+createTable();
+
+updateDisplayCount();
+
+</script>
+
+</body>
+</html>
